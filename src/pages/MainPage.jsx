@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import WhiteQueen from "../assets/WhiteQueen.png";
+import {solveNQueens} from "../utils/Logic.js"
 
 let MainPage = () => {
   let [n, setN] = useState(5);
@@ -9,49 +10,6 @@ let MainPage = () => {
   useEffect(() => {
     handleSubmit();
   }, []);
-
-  let isSafe = (solution, row, col) => {
-    for (let i = 0; i < row; i++) {
-      if (
-        solution[i] === col ||
-        solution[i] - i === col - row ||
-        solution[i] + i === col + row
-      ) {
-        return false;
-      }
-    }
-    return true;
-  };
-
-  let solveNQueens = (n) => {
-    let results = [];
-    let solution = [];
-
-    let backtrack = (row) => {
-      if (row === n) {
-        // Convert solution to board pattern
-        let board = [];
-        for (let i = 0; i < n; i++) {
-          let rowPattern = [];
-          for (let j = 0; j < n; j++) {
-            rowPattern.push(solution[i] === j ? "Q" : "");
-          }
-          board.push(rowPattern);
-        }
-        results.push(board);
-        return;
-      }
-      for (let col = 0; col < n; col++) {
-        if (isSafe(solution, row, col)) {
-          solution[row] = col;
-          backtrack(row + 1);
-        }
-      }
-    };
-
-    backtrack(0);
-    return results;
-  };
 
   let handleSubmit = () => {
     setLoading(true);
@@ -77,7 +35,7 @@ let MainPage = () => {
 
   return (
     <div className="flex min-h-screen justify-center bg-gradient-to-br from-[#000261] to-[#800031]">
-      <div className="w-[90%] my-5 p-6 rounded-2xl bg-white/7 border border-white/50 flex flex-col gap-5 items-center mb-6">
+      <div className="w-[90%] my-5 rounded-2xl bg-white/7 border border-white/50 flex flex-col gap-5 items-center mb-6">
         {/* input div */}
         <div className="flex items-center gap-4">
           <input
