@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import WhiteQueen from "../assets/WhiteQueen.png";
-import {solveNQueens} from "../utils/Logic.js"
+import { solveNQueens } from "../utils/Logic.js";
+import { useParams } from "react-router-dom";
 
 let MainPage = () => {
-  let [n, setN] = useState(5);
+  let {paramN} = useParams();
+  let [n, setN] = useState(paramN || 8);
   let [solutions, setSolutions] = useState([]);
   let [loading, setLoading] = useState(false);
 
@@ -35,7 +37,7 @@ let MainPage = () => {
 
   return (
     <div className="flex min-h-screen justify-center bg-gradient-to-br from-[#000261] to-[#800031]">
-      <div className="w-[90%] my-5 rounded-2xl bg-white/7 border border-white/50 flex flex-col gap-5 items-center mb-6">
+      <div className="w-[90%] my-5 py-5 mb-6 rounded-2xl bg-white/7 border border-white/50 flex flex-col gap-5 items-center">
         {/* input div */}
         <div className="flex items-center gap-4">
           <input
@@ -49,14 +51,13 @@ let MainPage = () => {
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded border border-white/50 text-white disabled:opacity-50"
+            className="px-4 py-2 bg-white/20 hover:bg-white/25 hover:shadow-[0px_0px_41px_0px_rgba(255,_255,_255,_0.2)] active:bg-white/35 transition cursor-pointer rounded border border-white/50 text-white disabled:opacity-50"
           >
             Solve
           </button>
-          <br />
-          {!loading && (
-            <p className="text-white">{solutions.length} solutions found!</p>
-          )}
+          <p className={`text-white ${loading ? "invisible" : "visible"}`}>
+            {solutions.length} solutions found!
+          </p>
         </div>
 
         {/* loader */}
@@ -91,7 +92,11 @@ let MainPage = () => {
             <div className="flex flex-wrap gap-5 justify-center">
               {solutions.length > 0 ? (
                 solutions.map((solution, index) => (
-                  <SolutionCard key={index} sequence={solution} />
+                  <SolutionCard
+                    key={index}
+                    sequence={solution}
+                    solutionNumber={index + 1}
+                  />
                 ))
               ) : (
                 <p className="text-white">No solutions found</p>
@@ -104,27 +109,77 @@ let MainPage = () => {
   );
 };
 
-let SolutionCard = ({ sequence }) => {
+let SolutionCard = ({ sequence, solutionNumber }) => {
+  let n = sequence.length;
+  let [pattern, setPattern] = useState([...sequence]);
+  let [activeQueen, setActiveQueen] = useState(null);
+
+  useEffect(() => {
+    if (activeQueen) {
+      let newPattern = [...sequence.map((row) => [...row])];
+
+      for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+          if (
+            !(i === activeQueen.row && j === activeQueen.col) &&
+            (i === activeQueen.row ||
+              j === activeQueen.col ||
+              i - j === activeQueen.row - activeQueen.col ||
+              i + j === activeQueen.row + activeQueen.col)
+          ) {
+            newPattern[i][j] = ".";
+          }
+        }
+      }
+      setPattern(newPattern);
+    } else {
+      setPattern([...sequence.map((row) => [...row])]);
+    }
+  }, [activeQueen]);
+
   return (
-    <div className="p-4 rounded-2xl bg-white/10 border border-white/50 shadow-[0_4px_50px_rgba(255,255,255,0.05)]">
-      {sequence.map((row, rowIndex) => (
+    <div className="p-4 pb-2 rounded-2xl bg-white/10 border border-white/50 shadow-[0_4px_50px_rgba(255,255,255,0.05)]">
+      {pattern.map((row, rowIndex) => (
         <div key={rowIndex} className="flex">
           {row.map((col, colIndex) => (
             <div
               key={colIndex}
               className={`w-8 h-8 flex items-center justify-center text-xl ${
                 (rowIndex + colIndex) % 2 === 0 ? "bg-white/20" : "bg-white/40"
+              } ${
+                activeQueen &&
+                activeQueen.row === rowIndex &&
+                activeQueen.col === colIndex
+                  ? "bg-yellow-500"
+                  : null
               }`}
             >
-              {sequence[rowIndex][colIndex] === "Q" ? (
-                <img src={WhiteQueen} alt="Q" className="w-full h-full" />
-              ) : (
-                ""
-              )}
+              {pattern[rowIndex][colIndex] === "Q" ? (
+                <img
+                  src={WhiteQueen}
+                  alt="Q"
+                  onClick={() => {
+                    if (
+                      activeQueen?.row === rowIndex &&
+                      activeQueen?.col === colIndex
+                    ) {
+                      setActiveQueen(null);
+                    } else {
+                      setActiveQueen({ row: rowIndex, col: colIndex });
+                    }
+                  }}
+                  className="w-full h-full"
+                />
+              ) : pattern[rowIndex][colIndex] === "." ? (
+                <div className="w-full h-full bg-red-500/50"></div>
+              ) : null}
             </div>
           ))}
         </div>
       ))}
+      <p className="w-full text-center text-white pt-2">
+        Solution {solutionNumber}
+      </p>
     </div>
   );
 };
