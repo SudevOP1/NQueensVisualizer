@@ -14,10 +14,12 @@ export function isSafe(solution, row, col) {
 export function solveNQueens(n) {
   let results = [];
   let solution = [];
+  let recursiveCallsCount = 0;
+  let startTime = performance.now();
 
   let backtrack = (row) => {
+    recursiveCallsCount++;
     if (row === n) {
-      // Convert solution to board pattern
       let board = [];
       for (let i = 0; i < n; i++) {
         let rowPattern = [];
@@ -38,5 +40,11 @@ export function solveNQueens(n) {
   };
 
   backtrack(0);
-  return results;
+  let endTime = performance.now();
+  let totalTimeMs = (endTime - startTime).toFixed(2);
+  return {
+    solutions: results,
+    recursiveCallsCount: recursiveCallsCount,
+    totalTimeMs: totalTimeMs,
+  };
 }

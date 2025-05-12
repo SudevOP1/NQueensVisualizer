@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import WhiteQueen from "../assets/WhiteQueen.png";
 import { solveNQueens } from "../utils/Logic.js";
 import { useParams } from "react-router-dom";
+import SolutionCard from "../component/SolutionCard.jsx";
 
-let MainPage = () => {
-  let {paramN} = useParams();
+let NQueen = () => {
+  let { paramN } = useParams();
   let [n, setN] = useState(paramN || 8);
   let [solutions, setSolutions] = useState([]);
+  let [stats, setStats] = useState([]);
   let [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -15,7 +17,7 @@ let MainPage = () => {
 
   let handleSubmit = () => {
     setLoading(true);
-    setSolutions([]);
+    setStats([]);
 
     setTimeout(() => {
       try {
@@ -25,8 +27,15 @@ let MainPage = () => {
           setLoading(false);
           return;
         }
-        let sols = solveNQueens(intN);
-        setSolutions(sols);
+        let answer = solveNQueens(intN);
+        setSolutions(answer.solutions);
+        setStats([
+          { name: "Solutions", quantity: answer.solutions.length.toLocaleString() },
+          { name: "Recursive Calls", quantity: answer.recursiveCallsCount.toLocaleString() },
+          { name: "Time Taken", quantity: answer.totalTimeMs + "ms" },
+          { name: "Solutions per Second", quantity: parseInt((answer.solutions.length/answer.totalTimeMs*1000)).toLocaleString() },
+          { name: "Estimated Memory Used", quantity: `${(solutions.length*intN*8/1024).toFixed(2)}KB` },
+        ]);
       } catch (error) {
         console.error("Error solving N-Queens:", error);
       } finally {
@@ -37,7 +46,8 @@ let MainPage = () => {
 
   return (
     <div className="flex min-h-screen justify-center bg-gradient-to-br from-[#000261] to-[#800031]">
-      <div className="w-[90%] my-5 py-5 mb-6 rounded-2xl bg-white/7 border border-white/50 flex flex-col gap-5 items-center">
+      <div className="w-[90%] my-5 py-5 mb-6 rounded-2xl bg-white/7 border border-white/50 flex flex-col items-center">
+
         {/* input div */}
         <div className="flex items-center gap-4">
           <input
@@ -55,10 +65,25 @@ let MainPage = () => {
           >
             Solve
           </button>
-          <p className={`text-white ${loading ? "invisible" : "visible"}`}>
-            {solutions.length} solutions found!
-          </p>
         </div>
+
+        {/* divider */}
+        <div className=" | my-5 w-full h-0 border-sm border-b border-white/50"></div>
+
+        {/* stats section */}
+        <div className="w-full text-white text-sm px-4">
+          <div className={`flex flex-row justify-center gap-4 text-center w-full`}>
+            {stats.map((stat) => (
+              <div key={stat.name} className="bg-white/10 rounded-lg px-2 py-1">
+                <span>{stat.quantity} </span>
+                <span>{stat.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* divider */}
+        <div className=" | my-5 w-full h-0 border-sm border-b border-white/50"></div>
 
         {/* loader */}
         {loading && (
@@ -87,6 +112,7 @@ let MainPage = () => {
           </div>
         )}
 
+        {/* solutions */}
         {!loading && (
           <div>
             <div className="flex flex-wrap gap-5 justify-center">
@@ -109,79 +135,4 @@ let MainPage = () => {
   );
 };
 
-let SolutionCard = ({ sequence, solutionNumber }) => {
-  let n = sequence.length;
-  let [pattern, setPattern] = useState([...sequence]);
-  let [activeQueen, setActiveQueen] = useState(null);
-
-  useEffect(() => {
-    if (activeQueen) {
-      let newPattern = [...sequence.map((row) => [...row])];
-
-      for (let i = 0; i < n; i++) {
-        for (let j = 0; j < n; j++) {
-          if (
-            !(i === activeQueen.row && j === activeQueen.col) &&
-            (i === activeQueen.row ||
-              j === activeQueen.col ||
-              i - j === activeQueen.row - activeQueen.col ||
-              i + j === activeQueen.row + activeQueen.col)
-          ) {
-            newPattern[i][j] = ".";
-          }
-        }
-      }
-      setPattern(newPattern);
-    } else {
-      setPattern([...sequence.map((row) => [...row])]);
-    }
-  }, [activeQueen]);
-
-  return (
-    <div className="p-4 pb-2 rounded-2xl bg-white/10 border border-white/50 shadow-[0_4px_50px_rgba(255,255,255,0.05)]">
-      {pattern.map((row, rowIndex) => (
-        <div key={rowIndex} className="flex">
-          {row.map((col, colIndex) => (
-            <div
-              key={colIndex}
-              className={`w-8 h-8 flex items-center justify-center text-xl ${
-                (rowIndex + colIndex) % 2 === 0 ? "bg-white/20" : "bg-white/40"
-              } ${
-                activeQueen &&
-                activeQueen.row === rowIndex &&
-                activeQueen.col === colIndex
-                  ? "bg-yellow-500"
-                  : null
-              }`}
-            >
-              {pattern[rowIndex][colIndex] === "Q" ? (
-                <img
-                  src={WhiteQueen}
-                  alt="Q"
-                  onClick={() => {
-                    if (
-                      activeQueen?.row === rowIndex &&
-                      activeQueen?.col === colIndex
-                    ) {
-                      setActiveQueen(null);
-                    } else {
-                      setActiveQueen({ row: rowIndex, col: colIndex });
-                    }
-                  }}
-                  className="w-full h-full"
-                />
-              ) : pattern[rowIndex][colIndex] === "." ? (
-                <div className="w-full h-full bg-red-500/50"></div>
-              ) : null}
-            </div>
-          ))}
-        </div>
-      ))}
-      <p className="w-full text-center text-white pt-2">
-        Solution {solutionNumber}
-      </p>
-    </div>
-  );
-};
-
-export default MainPage;
+export default NQueen;

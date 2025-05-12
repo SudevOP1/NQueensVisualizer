@@ -1,13 +1,12 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom"
-import MainPage from "./pages/MainPage"
+import NQueen from "./pages/NQueen"
 
 function App() {
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<MainPage />} />
-        <Route path="/:paramN" element={<MainPage />} />
+        <Route path="/" element={<NQueen />} />
       </Routes>
     </BrowserRouter>
   )
