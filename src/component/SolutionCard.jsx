@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import WhiteQueen from "../assets/WhiteQueen.png"
+import WhiteQueen from "../assets/WhiteQueen.png";
 
 let SolutionCard = ({ sequence, solutionNumber }) => {
   let n = sequence.length;

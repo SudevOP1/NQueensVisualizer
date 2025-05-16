@@ -48,3 +48,84 @@ export function solveNQueens(n) {
     totalTimeMs: totalTimeMs,
   };
 }
+
+export function rotate90(board) {
+  let n = board.length;
+  let newBoard = [];
+  for (let i = 0; i < n; i++) {
+    newBoard.push([]);
+  }
+
+  // rotate: (i, j) -> (j, n-i-1)
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      newBoard[j][n - i - 1] = board[i][j];
+    }
+  }
+
+  return newBoard;
+}
+
+export function getYMirror(board) {
+  let n = board.length;
+  let newBoard = [];
+  for (let i = 0; i < n; i++) {
+    newBoard.push([]);
+  }
+
+  // vertical mirror: (i, j) -> (n-i-1, j)
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      newBoard[n - i - 1][j] = board[i][j];
+    }
+  }
+
+  return newBoard;
+}
+
+export function getXMirror(board) {
+  let n = board.length;
+  let newBoard = [];
+  for (let i = 0; i < n; i++) {
+    newBoard.push([]);
+  }
+
+  // horizontal mirror: (i, j) -> (i, n-j-1)
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      newBoard[i][n - j - 1] = board[i][j];
+    }
+  }
+
+  return newBoard;
+}
+
+export function isSame(s1, s2) {
+  let n = s1.length;
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      if (s1[i][j] !== s2[i][j]) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+export function isRotated(s1, s2) {
+  if (
+    isSame(s1, rotate90(s2)) ||
+    isSame(s1, rotate90(rotate90(s2))) ||
+    isSame(s1, rotate90(rotate90(rotate90(s2))))
+  ) {
+    return true;
+  }
+  return false;
+}
+
+export function isMirror(s1, s2) {
+  if (isSame(s1, getXMirror(s2)) || isSame(s1, getYMirror(s2))) {
+    return true;
+  }
+  return false;
+}

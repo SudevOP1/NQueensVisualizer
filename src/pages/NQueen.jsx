@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import WhiteQueen from "../assets/WhiteQueen.png";
-import { solveNQueens } from "../utils/Logic.js";
+import { solveNQueens, isRotated, isMirror } from "../utils/Logic.js";
 import { useParams } from "react-router-dom";
 import SolutionCard from "../component/SolutionCard.jsx";
 
@@ -8,12 +7,66 @@ let NQueen = () => {
   let { paramN } = useParams();
   let [n, setN] = useState(paramN || 8);
   let [solutions, setSolutions] = useState([]);
+  let [filteredSolutions, setFilteredSolutions] = useState([]);
   let [stats, setStats] = useState([]);
   let [loading, setLoading] = useState(false);
+  let [filters, setFilters] = useState([
+    { name: "Rotations", isChecked: false },
+    { name: "Mirrors", isChecked: false },
+  ]);
 
   useEffect(() => {
     handleSubmit();
   }, []);
+
+  useEffect(() => {
+    if (solutions.length > 0)
+      setFilteredSolutions(getFilteredSolutions(solutions));
+  }, [filters, solutions]);
+
+  let getFilteredSolutions = (solutions) => {
+    let n = solutions[0].length;
+    let rotationFilter = filters.find((f) => f.name === "Rotations")?.isChecked;
+    let mirrorFilter = filters.find((f) => f.name === "Mirrors")?.isChecked;
+
+    // rotations
+    let rotationIndependentSolutions = [];
+    for (let i = 0; i < solutions.length; i++) {
+      let shouldAdd = true;
+      if (rotationFilter) {
+        for (let s of rotationIndependentSolutions) {
+          if (isRotated(s, solutions[i])) {
+            shouldAdd = false;
+            break;
+          }
+        }
+      }
+      if (shouldAdd) {
+        rotationIndependentSolutions.push(solutions[i]);
+      }
+    }
+
+    // mirrors
+    let mirrorIndependentSolutions = [];
+    if (mirrorFilter) {
+      for (let i = 0; i < rotationIndependentSolutions.length; i++) {
+        let shouldAdd = true;
+        for (let s of mirrorIndependentSolutions) {
+          if (isMirror(s, rotationIndependentSolutions[i])) {
+            shouldAdd = false;
+            break;
+          }
+        }
+        if (shouldAdd) {
+          mirrorIndependentSolutions.push(rotationIndependentSolutions[i]);
+        }
+      }
+    } else {
+      mirrorIndependentSolutions = rotationIndependentSolutions;
+    }
+
+    return mirrorIndependentSolutions;
+  };
 
   let handleSubmit = () => {
     setLoading(true);
@@ -29,12 +82,29 @@ let NQueen = () => {
         }
         let answer = solveNQueens(intN);
         setSolutions(answer.solutions);
+        setFilteredSolutions(getFilteredSolutions(answer.solutions));
         setStats([
-          { name: "Solutions", quantity: answer.solutions.length.toLocaleString() },
-          { name: "Recursive Calls", quantity: answer.recursiveCallsCount.toLocaleString() },
+          {
+            name: "Solutions",
+            quantity: answer.solutions.length.toLocaleString(),
+          },
+          {
+            name: "Recursive Calls",
+            quantity: answer.recursiveCallsCount.toLocaleString(),
+          },
           { name: "Time Taken", quantity: answer.totalTimeMs + "ms" },
-          { name: "Solutions per Second", quantity: parseInt((answer.solutions.length/answer.totalTimeMs*1000)).toLocaleString() },
-          { name: "Estimated Memory Used", quantity: `${(solutions.length*intN*8/1024).toFixed(2)}KB` },
+          {
+            name: "Solutions per Second",
+            quantity: parseInt(
+              (answer.solutions.length / answer.totalTimeMs) * 1000
+            ).toLocaleString(),
+          },
+          {
+            name: "Estimated Memory Used",
+            quantity: `${((answer.solutions.length * intN * 8) / 1024).toFixed(
+              2
+            )}KB`,
+          },
         ]);
       } catch (error) {
         console.error("Error solving N-Queens:", error);
@@ -44,10 +114,20 @@ let NQueen = () => {
     }, 50); // small delay to update the UI
   };
 
+  let toggleFilter = (name) => {
+    let newFilters = filters.map((f) => {
+      if (f.name === name) {
+        return { ...f, isChecked: !f.isChecked };
+      } else {
+        return f;
+      }
+    });
+    setFilters(newFilters);
+  };
+
   return (
     <div className="flex min-h-screen justify-center bg-gradient-to-br from-[#000261] to-[#800031]">
       <div className="w-[90%] my-5 py-5 mb-6 rounded-2xl bg-white/7 border border-white/50 flex flex-col items-center">
-
         {/* input div */}
         <div className="flex items-center gap-4">
           <input
@@ -72,13 +152,43 @@ let NQueen = () => {
 
         {/* stats section */}
         <div className="w-full text-white text-sm px-4">
-          <div className={`flex flex-row justify-center gap-4 text-center w-full`}>
+          <div
+            className={`flex flex-row justify-center gap-4 text-center w-full`}
+          >
             {stats.map((stat) => (
               <div key={stat.name} className="bg-white/10 rounded-lg px-2 py-1">
                 <span>{stat.quantity} </span>
                 <span>{stat.name}</span>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* divider */}
+        <div className=" | my-5 w-full h-0 border-sm border-b border-white/50"></div>
+
+        {/* filters */}
+        <div className="w-full text-white text-sm px-4">
+          <div
+            className={`flex flex-row justify-center gap-4 text-center w-full`}
+          >
+            {filters.map((filter) => (
+              <div
+                key={filter.name}
+                className="bg-white/10 rounded-lg px-2 py-1 flex items-center gap-2"
+              >
+                <input
+                  type="checkbox"
+                  checked={!filter.isChecked}
+                  onChange={() => toggleFilter(filter.name)}
+                  className="accent-white w-4 h-4 rounded-sm border-gray-300 cursor-pointer"
+                />
+                <span>Show {filter.name}</span>
+              </div>
+            ))}
+            <div className="bg-white/10 rounded-lg px-2 py-1">
+              <span>{filteredSolutions.length} Filtered Solutions</span>
+            </div>
           </div>
         </div>
 
@@ -116,8 +226,8 @@ let NQueen = () => {
         {!loading && (
           <div>
             <div className="flex flex-wrap gap-5 justify-center">
-              {solutions.length > 0 ? (
-                solutions.map((solution, index) => (
+              {filteredSolutions.length > 0 ? (
+                filteredSolutions.map((solution, index) => (
                   <SolutionCard
                     key={index}
                     sequence={solution}
