@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { solveNQueens, isRotated, isMirror } from "../utils/Logic.js";
-import { useSearchParams, useNavigate, useParams, Link } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import SolutionCard from "../component/SolutionCard.jsx";
+import Board from "../component/Board.jsx";
 
 let NQueen = () => {
   let [searchParams] = useSearchParams();
   let initialN = searchParams.get("n") || 8;
+  let solutionNo = parseInt(searchParams.get("solution")) || false;
   let [loading, setLoading] = useState(false);
   let [n, setN] = useState(initialN);
   let [stats, setStats] = useState([]);
@@ -150,50 +152,83 @@ let NQueen = () => {
         {/* divider */}
         <div className=" | my-5 w-full h-0 border-sm border-b border-white/50"></div>
 
-        {/* stats section */}
-        <div className="w-full text-white text-sm px-4">
-          <div
-            className={`flex flex-row justify-center gap-4 text-center w-full`}
-          >
-            {stats.map((stat) => (
-              <div key={stat.name} className="bg-white/10 rounded-lg px-2 py-1">
-                <span>{stat.quantity} </span>
-                <span>{stat.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* divider */}
-        <div className=" | my-5 w-full h-0 border-sm border-b border-white/50"></div>
-
-        {/* filters */}
-        <div className="w-full text-white text-sm px-4">
-          <div
-            className={`flex flex-row justify-center gap-4 text-center w-full`}
-          >
-            {filters.map((filter) => (
+        {solutionNo && filteredSolutions.length >= solutionNo ? (
+          <SolutionCard
+            sequence={filteredSolutions[solutionNo - 1]}
+            solutionNumber={solutionNo}
+            fullscreenToggle={"minimize"}
+          />
+        ) : (
+          <>
+            {/* stats section */}
+            <div className="w-full text-white text-sm px-4">
               <div
-                key={filter.name}
-                className="bg-white/10 rounded-lg px-2 py-1 flex items-center gap-2"
+                className={`flex flex-row justify-center gap-4 text-center w-full`}
               >
-                <input
-                  type="checkbox"
-                  checked={!filter.isChecked}
-                  onChange={() => toggleFilter(filter.name)}
-                  className="accent-white w-4 h-4 rounded-sm border-gray-300 cursor-pointer"
-                />
-                <span>Show {filter.name}</span>
+                {stats.map((stat) => (
+                  <div
+                    key={stat.name}
+                    className="bg-white/10 rounded-lg px-2 py-1"
+                  >
+                    <span>{stat.quantity} </span>
+                    <span>{stat.name}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-            <div className="bg-white/10 rounded-lg px-2 py-1">
-              <span>{filteredSolutions.length} Filtered Solutions</span>
             </div>
-          </div>
-        </div>
 
-        {/* divider */}
-        <div className=" | my-5 w-full h-0 border-sm border-b border-white/50"></div>
+            {/* divider */}
+            <div className=" | my-5 w-full h-0 border-sm border-b border-white/50"></div>
+
+            {/* filters */}
+            <div className="w-full text-white text-sm px-4">
+              <div
+                className={`flex flex-row justify-center gap-4 text-center w-full`}
+              >
+                {filters.map((filter) => (
+                  <div
+                    key={filter.name}
+                    className="bg-white/10 rounded-lg px-2 py-1 flex items-center gap-2"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={!filter.isChecked}
+                      onChange={() => toggleFilter(filter.name)}
+                      className="accent-white w-4 h-4 rounded-sm border-gray-300 cursor-pointer"
+                    />
+                    <span>Show {filter.name}</span>
+                  </div>
+                ))}
+                <div className="bg-white/10 rounded-lg px-2 py-1">
+                  <span>{filteredSolutions.length} Filtered Solutions</span>
+                </div>
+              </div>
+            </div>
+
+            {/* divider */}
+            <div className=" | my-5 w-full h-0 border-sm border-b border-white/50"></div>
+
+            {/* solutions */}
+            {!loading && (
+              <div>
+                <div className="flex flex-wrap gap-5 justify-center">
+                  {filteredSolutions.length > 0 ? (
+                    filteredSolutions.map((solution, index) => (
+                      <SolutionCard
+                        key={index}
+                        sequence={solution}
+                        solutionNumber={index + 1}
+                        fullscreenToggle={"maximize"}
+                      />
+                    ))
+                  ) : (
+                    <p className="text-white">No solutions found</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
+        )}
 
         {/* loader */}
         {loading && (
@@ -219,25 +254,6 @@ let NQueen = () => {
               ></path>
             </svg>
             <span className="ml-2 text-white">Calculating solutions...</span>
-          </div>
-        )}
-
-        {/* solutions */}
-        {!loading && (
-          <div>
-            <div className="flex flex-wrap gap-5 justify-center">
-              {filteredSolutions.length > 0 ? (
-                filteredSolutions.map((solution, index) => (
-                  <SolutionCard
-                    key={index}
-                    sequence={solution}
-                    solutionNumber={index + 1}
-                  />
-                ))
-              ) : (
-                <p className="text-white">No solutions found</p>
-              )}
-            </div>
           </div>
         )}
       </div>

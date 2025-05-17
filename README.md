@@ -8,4 +8,4 @@ More Changes i want to make:<br/>
 ✅ Statistics Section (eg. total solutions, number of recursive calls, time taken)<br/>
 ✅ Symmetry filters (eg. rotations, mirror)<br/>
 ❌ Position filter (eg. queen at position(1,1))<br/>
-❌ Separate url for individual solution page (eg. ?n=8&solution=23)<br/>
+✅ Separate url for individual solution page (eg. ?n=8&solution=23)<br/>
