@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { solveNQueens, isRotated, isMirror } from "../utils/Logic.js";
-import { useParams } from "react-router-dom";
+import { useSearchParams, useNavigate, useParams, Link } from "react-router-dom";
 import SolutionCard from "../component/SolutionCard.jsx";
 
 let NQueen = () => {
-  let { paramN } = useParams();
-  let [n, setN] = useState(paramN || 8);
+  let [searchParams] = useSearchParams();
+  let initialN = searchParams.get("n") || 8;
+  let [loading, setLoading] = useState(false);
+  let [n, setN] = useState(initialN);
+  let [stats, setStats] = useState([]);
   let [solutions, setSolutions] = useState([]);
   let [filteredSolutions, setFilteredSolutions] = useState([]);
-  let [stats, setStats] = useState([]);
-  let [loading, setLoading] = useState(false);
   let [filters, setFilters] = useState([
     { name: "Rotations", isChecked: false },
     { name: "Mirrors", isChecked: false },
@@ -17,7 +18,7 @@ let NQueen = () => {
 
   useEffect(() => {
     handleSubmit();
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     if (solutions.length > 0)
@@ -74,7 +75,7 @@ let NQueen = () => {
 
     setTimeout(() => {
       try {
-        let intN = parseInt(n);
+        let intN = parseInt(searchParams.get("n") || n);
         if (isNaN(intN) || intN < 1) {
           alert("Please enter a valid integer greater than 0");
           setLoading(false);
@@ -138,13 +139,12 @@ let NQueen = () => {
             min="1"
             className="p-2 rounded bg-white/20 border border-white/50 text-white"
           />
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
+          <Link
+            to={`/?n=${n}`}
             className="px-4 py-2 bg-white/20 hover:bg-white/25 hover:shadow-[0px_0px_41px_0px_rgba(255,_255,_255,_0.2)] active:bg-white/35 transition cursor-pointer rounded border border-white/50 text-white disabled:opacity-50"
           >
             Solve
-          </button>
+          </Link>
         </div>
 
         {/* divider */}
