@@ -29,11 +29,11 @@ npm install
 npm run dev
 ```
 ### 3. See the magic happen
-Go to `http://localhost:5173`
+Go to `http://localhost:5173`<br>
 <br>
 
-## ✨ Website Design -->
-![Example](https://raw.githubusercontent.com/SudevOP1/NQueensVisualizer/main/Implementation.png)
+## ✨ Website Design
+![Example](https://raw.githubusercontent.com/SudevOP1/NQueensVisualizer/main/Implementation.png)<br>
 <br>
 
 ## Future Ideas
