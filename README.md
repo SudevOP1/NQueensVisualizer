@@ -24,7 +24,7 @@ git clone https://github.com/SudevOP1/NQueensVisualizer.git
 ```
 ### 2. Frontend Server
 ```powershell
-cd NQueensVisualizer/frontend
+cd NQueensVisualizer
 npm install
 npm run dev
 ```
