@@ -1,6 +1,7 @@
 # N Queens Problem Visualizer
 
 This project calculates all possible solutions to the N Queens Problem and helps visualize them<br/>
+[View Live](https://sudevop1.github.io/NQueensVisualizer/)
 <br>
 
 ## 💡 What it does
